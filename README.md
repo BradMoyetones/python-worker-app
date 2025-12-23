@@ -54,6 +54,26 @@ Como en Node.js usamos `package.json`, aquí usamos el `requirements.txt`. Estos
 
 ---
 
+## 🏗️ Generar Ejecutables (Build)
+
+Se ha configurado un archivo `WorkerAppPro.spec` para empaquetar la aplicación junto con sus `assets` de forma automática.
+
+### Para Windows (.exe) o macOS (.app)
+
+1. Instala PyInstaller: `pip install pyinstaller`
+2. Ejecuta el build:
+```bash
+pyinstaller WorkerAppPro.spec
+
+```
+
+
+3. Encontrarás el resultado en la carpeta `dist/`.
+
+*Nota: Para generar el ejecutable de Windows debes estar en Windows, y para el de Mac debes estar en macOS.*
+
+---
+
 ## 🛠️ Comandos de Desarrollo Útiles
 
 ### Auto-reload (Tipo Vite/Nodemon)
@@ -71,7 +91,8 @@ watchmedo auto-restart --patterns="*.py" --recursive -- python main.py
 
 ### Estructura del Proyecto
 
-* `app/ui/`: Definición de ventanas y widgets (PySide6).
-* `app/actions/`: Lógica de cada tarea (clases que heredan de `BaseAction`).
-* `app/core/`: El motor que ejecuta las acciones y maneja los hilos.
+* `app/ui/`: Definición de ventanas y widgets (PySide6) y vistas dinámicas.
+* `app/actions/`: Lógica de cada tarea (clases de acción pura).
+* `app/core/`: El motor (Runner) que maneja hilos y el sistema de Workflows.
+* `assets/`: Iconos SVG y recursos visuales.
 * `main.py`: Punto de entrada y orquestador principal.
