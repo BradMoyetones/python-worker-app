@@ -5,12 +5,16 @@
             "age": 30
         },
         {
-            "name": "Boby",
-            "age": "25"
+            "name": "Bob",
+            "age": 25
         },
         {
             "name": "Charlie",
             "age": 35
+        },
+        {
+            "name": "Brad",
+            "age": 22
         }
     ]
 }

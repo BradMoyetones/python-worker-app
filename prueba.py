@@ -1,71 +1,119 @@
 import json
 from tabulate import tabulate
 
-datos_leidos = []
-usuarios = []
-encabezados = ["index", "Nombre", "Edad"]
+DB_PATH = "base_datos.json"
+ENCABEZADOS = ["Index", "Nombre", "Edad"]
+COMMANDS = ["crear usuario", "eliminar usuario", "modificar usuario", "salir"]
 
-with open('base_datos.json', 'r', encoding='utf-8') as archivo_json:
-    datos_leidos = json.load(archivo_json)
+def cargar_db():
+    try:
+        with open(DB_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data.get("usuarios", [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
 
-usuarios = datos_leidos['usuarios']
-print("Lista de usuarios:")
-# Usar tabulate de forma correcta porque pasando usuarios directamente da error
-# print(tabulate(usuarios, headers=encabezados, tablefmt="grid"))
-print(tabulate([[i, user['name'], user['age']] for i, user in enumerate(usuarios)], headers=encabezados, tablefmt="grid"))
+def guardar_db(usuarios):
+    with open(DB_PATH, "w", encoding="utf-8") as f:
+        json.dump({"usuarios": usuarios}, f, ensure_ascii=False, indent=4)
 
-commands = ["crear usuario", "eliminar usuario", "modificar usuario"]
+def mostrar_usuarios(usuarios):
+    if not usuarios:
+        print("No hay usuarios registrados.\n")
+        return
 
-for command in commands:
-    # La persona debe ingresar el indice del comando
-    print(f"Comando disponible: {command} -> digita {commands.index(command)} para seleccionarlo")
+    tabla = [
+        [i, user["name"], user["age"]]
+        for i, user in enumerate(usuarios)
+    ]
 
-commands_input = input("Escribe un comando: ")
+    print(tabulate(tabla, headers=ENCABEZADOS, tablefmt="grid"))
+    print()
 
-if commands_input.isdigit() and int(commands_input) < len(commands):
-    comando_seleccionado = commands[int(commands_input)]
-    print(f"Has seleccionado el comando: {comando_seleccionado}")
-else:
-    print("Comando no válido.")
-    exit()
+def mostrar_menu():
+    print("Comandos disponibles:")
+    for i, cmd in enumerate(COMMANDS):
+        print(f"[{i}] {cmd}")
 
-command_index = commands.index(comando_seleccionado)
-if command_index == 0:
-    print("Creando usuario...")
-    name = input("Ingresa el nombre del nuevo usuario: ")
-    age = input("Ingresa la edad del nuevo usuario: ")
-    print(f"Usuario {name} de {age} años creado.")
-    usuarios.append({"name": name, "age": age})
-    with open('base_datos.json', 'w', encoding='utf-8') as archivo_json:
-        json.dump({"usuarios": usuarios}, archivo_json, ensure_ascii=False, indent=4)
-    print("Usuario guardado en la base de datos.")
-elif command_index == 1:
-    print("Eliminando usuario..")
-    index = input("Ingresa el índice del usuario a eliminar: ")
-    if index.isdigit() and int(index) < len(usuarios):
-        usuario_eliminado = usuarios.pop(int(index))
-        print(f"Usuario {usuario_eliminado['name']} eliminado.")
-        with open('base_datos.json', 'w', encoding='utf-8') as archivo_json:
-            json.dump({"usuarios": usuarios}, archivo_json, ensure_ascii=False, indent=4)
-        print("Usuario eliminado de la base de datos.")
-    else:
-        print("Índice no válido.")
-        exit()
-elif command_index == 2:
-    print("Modificando usuario...")
-    index = input("Ingresa el índice del usuario a modificar: ")
-    if index.isdigit() and int(index) < len(usuarios):
-        nuevo_nombre = input("Ingresa el nuevo nombre: ")
-        nueva_edad = input("Ingresa la nueva edad: ")
-        usuarios[int(index)]['name'] = nuevo_nombre
-        usuarios[int(index)]['age'] = nueva_edad
-        print(f"Usuario modificado a {nuevo_nombre}, {nueva_edad} años.")
-        with open('base_datos.json', 'w', encoding='utf-8') as archivo_json:
-            json.dump({"usuarios": usuarios}, archivo_json, ensure_ascii=False, indent=4)
-        print("Usuario modificado en la base de datos.")
-    else:
-        print("Índice no válido.")
-        exit()
+def crear_usuario(usuarios):
+    name = input("Nombre: ").strip()
+    age = input("Edad: ").strip()
 
+    if not age.isdigit():
+        print("Edad no válida.\n")
+        return
 
+    usuarios.append({
+        "name": name,
+        "age": int(age)
+    })
 
+    guardar_db(usuarios)
+    print("Usuario creado correctamente.\n")
+
+def eliminar_usuario(usuarios):
+    index = input("Índice del usuario a eliminar: ")
+
+    if not index.isdigit() or int(index) >= len(usuarios):
+        print("Índice no válido.\n")
+        return
+
+    eliminado = usuarios.pop(int(index))
+    guardar_db(usuarios)
+
+    print(f"Usuario '{eliminado['name']}' eliminado.\n")
+
+def modificar_usuario(usuarios):
+    index = input("Índice del usuario a modificar: ")
+
+    if not index.isdigit() or int(index) >= len(usuarios):
+        print("Índice no válido.\n")
+        return
+
+    name = input("Nuevo nombre: ").strip()
+    age = input("Nueva edad: ").strip()
+
+    if not age.isdigit():
+        print("Edad no válida.\n")
+        return
+
+    usuarios[int(index)]["name"] = name
+    usuarios[int(index)]["age"] = int(age)
+
+    guardar_db(usuarios)
+    print("Usuario modificado correctamente.\n")
+
+def main():
+    print("""
+====================================
+     USER MANAGER CLI v1.0
+====================================
+""")
+
+    usuarios = cargar_db()
+
+    while True:
+        mostrar_usuarios(usuarios)
+        mostrar_menu()
+
+        opcion = input("\nSelecciona una opción: ")
+
+        if not opcion.isdigit():
+            print("Opción no válida.\n")
+            continue
+
+        opcion = int(opcion)
+
+        if opcion == 0:
+            crear_usuario(usuarios)
+        elif opcion == 1:
+            eliminar_usuario(usuarios)
+        elif opcion == 2:
+            modificar_usuario(usuarios)
+        elif opcion == 3:
+            print("Saliendo de la aplicación 👋")
+            break
+        else:
+            print("Opción no válida.\n")
+
+main()

@@ -1,4 +1,5 @@
 altgraph==0.17.5
+colorama==0.4.6
 importlib_metadata==8.7.1
 macholib==1.16.4
 packaging==25.0
